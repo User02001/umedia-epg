@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: '0 18 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   grab:
     runs-on: ubuntu-latest
@@ -12,7 +16,9 @@ jobs:
         with:
           node-version: 20
       - name: Clone iptv-org/epg
-        run: git clone https://github.com/iptv-org/epg iptv-epg
+        run: |
+          git clone https://github.com/iptv-org/epg iptv-epg
+          rm -rf iptv-epg/.git
       - name: Install iptv-org/epg deps
         run: npm install
         working-directory: iptv-epg
