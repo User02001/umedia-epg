@@ -1,0 +1,35 @@
+name: Refresh EPG
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+jobs:
+  grab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Clone iptv-org/epg
+        run: git clone https://github.com/iptv-org/epg iptv-epg
+      - name: Install iptv-org/epg deps
+        run: npm install
+        working-directory: iptv-epg
+      - name: Grab zuragt.mn
+        run: npm run grab -- --sites=zuragt.mn --days=3
+        working-directory: iptv-epg
+      - name: Install fast-xml-parser
+        run: npm install fast-xml-parser
+        working-directory: iptv-epg
+      - name: Copy convert script
+        run: cp ../convert.js .
+        working-directory: iptv-epg
+      - name: Convert to JSON
+        run: node convert.js
+        working-directory: iptv-epg
+      - name: Move guide.json to root
+        run: cp iptv-epg/guide.json guide.json
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: chore refresh epg
